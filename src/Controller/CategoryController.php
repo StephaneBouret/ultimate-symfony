@@ -15,10 +15,22 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 class CategoryController extends AbstractController
 {
     private $em;
+    private $categoryRepository;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, CategoryRepository $categoryRepository)
     {
         $this->em = $em;
+        $this->categoryRepository = $categoryRepository;
+    }
+
+    public function renderMenuList(): Response
+    {
+        // 1. Aller chercher les catégories dans la BDD (pas de Repository dans les paramètres de la fonction car absence de route - uniquement par injection de dépendance)
+        $categories = $this->categoryRepository->findAll();
+        // 2. Renvoyer le rendu HTML sous la forme d'une Response ($this->render)
+        return $this->render('category/_menu.html.twig', [
+            'categories' => $categories
+        ]);
     }
     
     #[Route('/admin/category/create', name: 'category_create')]
@@ -30,7 +42,7 @@ class CategoryController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $category->setSlug(strtolower($slugger->slug($category->getName())));
 
             $this->em->persist($category);
@@ -53,7 +65,7 @@ class CategoryController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
 
             return $this->redirectToRoute('homepage');
