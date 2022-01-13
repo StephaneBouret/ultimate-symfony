@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductController extends AbstractController
 {
@@ -57,7 +58,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/admin/product/{id}/edit', name: 'product_edit')]
-    public function edit($id, ProductRepository $productRepository, Request $request): Response
+    public function edit($id, ProductRepository $productRepository, Request $request, ValidatorInterface $validator): Response
     {
         $product = $productRepository->find($id);
 
@@ -65,7 +66,7 @@ class ProductController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // $product = $form->getData();
             $this->em->flush();
             
@@ -90,7 +91,7 @@ class ProductController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // $product = $form->getData(); // just set up a fresh $product object
             $product->setSlug(strtolower($slugger->slug($product->getName())));
 
