@@ -23,7 +23,10 @@ class ProductController extends AbstractController
         $this->em = $em;
     }
 
-    #[Route('/{slug}', name: 'product_category')]
+    /**
+    * This route is defined last.
+    */
+    #[Route('/{slug}', name: 'product_category', priority: -1)]
     public function category($slug, CategoryRepository $categoryRepository): Response
     {
         $category = $categoryRepository->findOneBy([
