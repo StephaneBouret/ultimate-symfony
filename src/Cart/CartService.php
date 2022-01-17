@@ -83,11 +83,11 @@ class CartService
         // Soit le produit = 1, alors il faut le supprimer
         if ($cart[$id] === 1) {
             $this->remove($id);
+        } else {
+            // Soit le produit est à plus de 1, alors il faut décrementer
+            $cart[$id]--;
+            $this->saveCart($cart);
         }
-        // Soit le produit est à plus de 1, alors il faut décrementer
-        $cart[$id]--;
-
-        $this->saveCart($cart);
     }
 
     public function getTotal(): int
