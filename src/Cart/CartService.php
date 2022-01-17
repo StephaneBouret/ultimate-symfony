@@ -29,6 +29,11 @@ class CartService
         return $session->set('cart', $cart);
     }
 
+    public function empty()
+    {
+        $this->saveCart([]);
+    }
+
     public function add(int $id)
     {
         // $session = $this->requestStack->getSession();
@@ -104,6 +109,9 @@ class CartService
         return $total;
     }
 
+    /**
+     * @return CartItem[]
+     */
     public function getDetailedCartItems(): array
     {
         $session = $this->requestStack->getSession();
