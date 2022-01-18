@@ -58,6 +58,11 @@ class PurchaseItem
     {
         $this->purchase = $purchase;
 
+        // refactoring pour lifecyclecallbacks (purchaseItem.php modifié)
+        if (!$purchase->getPurchaseItems()->contains($this)) {
+            $purchase->addPurchaseItem($this);
+        }
+
         return $this;
     }
 

@@ -2,12 +2,17 @@
 
 namespace App\Entity;
 
-use App\Repository\PurchaseRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\PrePersist;
+use App\Repository\PurchaseRepository;
+use DateTime;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping\PreFlush;
 
 #[ORM\Entity(repositoryClass: PurchaseRepository::class)]
+#[HasLifecycleCallbacks]
 class Purchase
 {
     public const STATUS_PENDING = 'PENDING';
@@ -43,11 +48,32 @@ class Purchase
     private $purchasedAt;
 
     #[ORM\OneToMany(mappedBy: 'purchase', targetEntity: PurchaseItem::class, orphanRemoval: true)]
+    /** @var Collection<PurchaseItem> */
     private $purchaseItems;
 
     public function __construct()
     {
         $this->purchaseItems = new ArrayCollection();
+    }
+
+    #[PrePersist]
+    public function prePersist()
+    {
+        if (empty($this->purchasedAt)) {
+            $this->purchasedAt = new DateTime();
+        }
+    }
+
+    #[PreFlush]
+    public function preFlush()
+    {
+        $total = 0;
+
+        foreach ($this->purchaseItems as $item) {
+            $total += $item->getTotal();
+        }
+
+        $this->total = $total;
     }
 
     public function getId(): ?int
